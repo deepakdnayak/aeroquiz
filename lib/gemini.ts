@@ -1,5 +1,10 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+console.log(
+  "Gemini key loaded:",
+  !!process.env.GEMINI_API_KEY
+);
+
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
 
 export interface GenerateQuizParams {
@@ -23,7 +28,7 @@ export interface GeneratedQuestion {
 export async function generateQuizWithGemini(
   params: GenerateQuizParams
 ): Promise<GeneratedQuestion[]> {
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
   const prompt = `
 You are an expert quiz creator for school students.
