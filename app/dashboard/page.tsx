@@ -16,9 +16,9 @@ interface Quiz {
 }
 
 interface Stats {
-  totalAttempted: number;
+  totalAttempted:    number;
   averagePercentage: number;
-  monthlyTrend: { month: string; percentage: number }[];
+  monthlyTrend:      { month: string; percentage: number }[];
 }
 
 const subjectColor: Record<string, string> = {
@@ -37,10 +37,13 @@ function Countdown({ to }: { to: string }) {
       if (ms <= 0) { setDiff('Expired'); return; }
       const h = Math.floor(ms / 3600000);
       const m = Math.floor((ms % 3600000) / 60000);
-      setDiff(`${h}h ${m}m left`);
+      const s = Math.floor((ms % 60000) / 1000);
+      if (h > 0) setDiff(`${h}h ${m}m left`);
+      else if (m > 0) setDiff(`${m}m ${s}s left`);
+      else setDiff(`${s}s left`);
     };
     calc();
-    const t = setInterval(calc, 30000);
+    const t = setInterval(calc, 1000);
     return () => clearInterval(t);
   }, [to]);
 
@@ -54,10 +57,17 @@ function Countdown({ to }: { to: string }) {
 
 export default function StudentDashboard() {
   const { data: session } = useSession();
-  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
-  const [stats, setStats]     = useState<Stats | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [quizzes, setQuizzes]   = useState<Quiz[]>([]);
+  const [stats, setStats]       = useState<Stats | null>(null);
+  const [loading, setLoading]   = useState(true);
   const [attempted, setAttempted] = useState<Set<string>>(new Set());
+  const [now, setNow]           = useState(new Date());
+
+  // Keep `now` ticking so quiz windows open/close in real time
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 10000);
+    return () => clearInterval(t);
+  }, []);
 
   useEffect(() => {
     Promise.all([
@@ -69,7 +79,9 @@ export default function StudentDashboard() {
       setStats(sData);
       const ids = new Set<string>(
         (subData.submissions || []).map((s: any) =>
-          typeof s.quizId === 'object' ? s.quizId._id?.toString() : s.quizId?.toString()
+          typeof s.quizId === 'object'
+            ? s.quizId._id?.toString()
+            : s.quizId?.toString()
         )
       );
       setAttempted(ids);
@@ -77,15 +89,20 @@ export default function StudentDashboard() {
     });
   }, []);
 
-  const now = new Date();
+  // Categorise quizzes
   const available = quizzes.filter(q => {
     const from = new Date(q.availableFrom);
     const to   = new Date(q.availableTo);
-    return now >= from && now <= to && !attempted.has(q._id.toString());
+    const notAttempted = !attempted.has(q._id.toString());
+    return now >= from && now <= to && notAttempted;
   });
+
+  // Quizzes opening in the future, not yet attempted
   const upcoming = quizzes.filter(q =>
     new Date(q.availableFrom) > now && !attempted.has(q._id.toString())
   );
+
+  // Quizzes already attempted OR window has closed
   const past = quizzes.filter(q =>
     attempted.has(q._id.toString()) || new Date(q.availableTo) < now
   );
@@ -101,7 +118,7 @@ export default function StudentDashboard() {
       {/* Greeting */}
       <div className="fade-up" style={{ marginBottom: 28 }}>
         <h1 style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.02em' }}>
-          Hey, {session?.user?.username?.split('d')[0] || 'Shashank'} 👋
+          Hey, {session?.user?.username || 'Shashank'} 👋
         </h1>
         <p style={{ color: 'var(--text-muted)', fontSize: 14, marginTop: 4 }}>
           Here are your quizzes for today
@@ -114,12 +131,15 @@ export default function StudentDashboard() {
           display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14, marginBottom: 32,
         }}>
           {[
-            { label: 'Attempted',    value: stats.totalAttempted,       color: '#22c55e' },
+            { label: 'Attempted',     value: stats.totalAttempted,          color: '#22c55e' },
             { label: 'Average Score', value: `${stats.averagePercentage}%`, color: 'var(--accent)' },
-            { label: 'Available Now', value: available.length,           color: 'var(--warning)' },
+            { label: 'Available Now', value: available.length,              color: 'var(--warning)' },
           ].map(s => (
             <div key={s.label} className="card" style={{ padding: 18 }}>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>
+              <div style={{
+                fontSize: 11, color: 'var(--text-muted)', fontWeight: 600,
+                textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6,
+              }}>
                 {s.label}
               </div>
               <div style={{ fontSize: 28, fontWeight: 800, color: s.color }}>{s.value}</div>
@@ -131,8 +151,15 @@ export default function StudentDashboard() {
       {/* Available now */}
       {available.length > 0 && (
         <section className="fade-up-2" style={{ marginBottom: 32 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--success)', display: 'inline-block', boxShadow: '0 0 8px var(--success)' }} />
+          <h2 style={{
+            fontSize: 16, fontWeight: 700, marginBottom: 14,
+            display: 'flex', alignItems: 'center', gap: 8,
+          }}>
+            <span style={{
+              width: 8, height: 8, borderRadius: '50%',
+              background: 'var(--success)', display: 'inline-block',
+              boxShadow: '0 0 8px var(--success)',
+            }} />
             Available Now
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -141,7 +168,9 @@ export default function StudentDashboard() {
                 padding: '18px 24px', display: 'flex', alignItems: 'center', gap: 16,
                 borderColor: 'rgba(34,197,94,0.3)',
               }}>
-                <span className={`subject-tag ${subjectColor[q.subject] || ''}`}>{q.subject}</span>
+                <span className={`subject-tag ${subjectColor[q.subject] || ''}`}>
+                  {q.subject}
+                </span>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 3 }}>{q.title}</div>
                   <div style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', gap: 12 }}>
@@ -150,24 +179,11 @@ export default function StudentDashboard() {
                     <Countdown to={q.availableTo} />
                   </div>
                 </div>
-                {attempted.has(q._id.toString()) ? (
-                  <button
-                    disabled
-                    style={{
-                      padding: '9px 22px', borderRadius: 10, fontSize: 14, fontWeight: 600,
-                      background: 'var(--bg-elevated)', color: 'var(--text-muted)',
-                      border: '1px solid var(--border)', cursor: 'not-allowed',
-                    }}
-                  >
-                    Submitted ✓
+                <Link href={`/dashboard/quiz/${q._id}`}>
+                  <button className="btn-primary" style={{ padding: '9px 22px' }}>
+                    Start →
                   </button>
-                ) : (
-                  <Link href={`/dashboard/quiz/${q._id}`}>
-                    <button className="btn-primary" style={{ padding: '9px 22px' }}>
-                      Start →
-                    </button>
-                  </Link>
-                )}
+                </Link>
               </div>
             ))}
           </div>
@@ -177,28 +193,89 @@ export default function StudentDashboard() {
       {/* Upcoming */}
       {upcoming.length > 0 && (
         <section className="fade-up-3" style={{ marginBottom: 32 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 14, color: 'var(--text-secondary)' }}>
+          <h2 style={{
+            fontSize: 16, fontWeight: 700, marginBottom: 14,
+            color: 'var(--text-secondary)',
+          }}>
             Upcoming
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {upcoming.map(q => (
-              <div key={q._id} className="card" style={{ padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 14, opacity: 0.7 }}>
-                <span className={`subject-tag ${subjectColor[q.subject] || ''}`}>{q.subject}</span>
+              <div key={q._id} className="card" style={{
+                padding: '14px 24px', display: 'flex',
+                alignItems: 'center', gap: 14, opacity: 0.7,
+              }}>
+                <span className={`subject-tag ${subjectColor[q.subject] || ''}`}>
+                  {q.subject}
+                </span>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{q.title}</div>
                   <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                    Available from {new Date(q.availableFrom).toLocaleString()}
+                    Opens {new Date(q.availableFrom).toLocaleString()}
                   </div>
                 </div>
-                <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600 }}>Upcoming</span>
+                <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600 }}>
+                  Upcoming
+                </span>
               </div>
             ))}
           </div>
         </section>
       )}
 
-      {/* No quizzes */}
-      {available.length === 0 && upcoming.length === 0 && (
+      {/* Past / Attempted */}
+      {past.length > 0 && (
+        <section className="fade-up-3" style={{ marginBottom: 32 }}>
+          <h2 style={{
+            fontSize: 16, fontWeight: 700, marginBottom: 14,
+            color: 'var(--text-secondary)',
+          }}>
+            Past Quizzes
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {past.map(q => {
+              const isAttempted = attempted.has(q._id.toString());
+              return (
+                <div key={q._id} className="card" style={{
+                  padding: '14px 24px', display: 'flex',
+                  alignItems: 'center', gap: 14, opacity: 0.6,
+                }}>
+                  <span className={`subject-tag ${subjectColor[q.subject] || ''}`}>
+                    {q.subject}
+                  </span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{q.title}</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                      {new Date(q.availableFrom).toLocaleDateString()} –{' '}
+                      {new Date(q.availableTo).toLocaleDateString()}
+                    </div>
+                  </div>
+                  {isAttempted ? (
+                    <span style={{
+                      fontSize: 12, padding: '4px 12px', borderRadius: 20, fontWeight: 700,
+                      background: 'rgba(34,197,94,0.1)', color: 'var(--success)',
+                      border: '1px solid rgba(34,197,94,0.3)',
+                    }}>
+                      ✓ Submitted
+                    </span>
+                  ) : (
+                    <span style={{
+                      fontSize: 12, padding: '4px 12px', borderRadius: 20, fontWeight: 700,
+                      background: 'rgba(239,68,68,0.1)', color: 'var(--danger)',
+                      border: '1px solid rgba(239,68,68,0.3)',
+                    }}>
+                      Missed
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Completely empty state */}
+      {available.length === 0 && upcoming.length === 0 && past.length === 0 && (
         <div className="card" style={{ padding: 60, textAlign: 'center', color: 'var(--text-muted)' }}>
           <div style={{ fontSize: 40, marginBottom: 12 }}>🎉</div>
           <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 6 }}>All caught up!</div>
