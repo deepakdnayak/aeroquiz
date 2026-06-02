@@ -6,7 +6,7 @@ import Quiz from '@/lib/models/Quiz';
 import Submission from '@/lib/models/Submission';
 import User from '@/lib/models/User';
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== 'student') {
@@ -15,12 +15,13 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     await connectDB();
 
-    const quiz = await Quiz.findById(params.id);
+    const { id } = await params;
+const quiz = await Quiz.findById(id);
     if (!quiz) return NextResponse.json({ error: 'Quiz not found' }, { status: 404 });
 
     // Check for existing submission
     const existing = await Submission.findOne({
-      quizId: params.id,
+      quizId: id,
       studentId: session.user.id,
     });
     if (existing) {
@@ -79,7 +80,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const totalMaxMarks = quiz.questions.reduce((sum, q) => sum + q.marks, 0);
 
     const submission = await Submission.create({
-      quizId: params.id,
+      quizId: id,
       studentId: session.user.id,
       startedAt: new Date(startedAt),
       submittedAt: now,

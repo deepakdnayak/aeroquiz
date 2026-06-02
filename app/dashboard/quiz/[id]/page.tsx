@@ -45,12 +45,22 @@ export default function QuizPage() {
   // Load quiz
   useEffect(() => {
     fetch(`/api/quiz/${id}`)
-      .then(r => r.json())
-      .then(d => {
+      .then(async r => {
+        const d = await r.json();
+        console.log('Quiz fetch response:', d);
+        if (!r.ok) {
+          console.error('Quiz fetch failed:', r.status, d);
+          setLoading(false);
+          return;
+        }
         if (d.quiz) {
           setQuiz(d.quiz);
           setTimeLeft(d.quiz.duration * 60);
         }
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Quiz fetch error:', err);
         setLoading(false);
       });
   }, [id]);

@@ -67,7 +67,11 @@ export default function StudentDashboard() {
     ]).then(([qData, sData, subData]) => {
       setQuizzes(qData.quizzes || []);
       setStats(sData);
-      const ids = new Set<string>((subData.submissions || []).map((s: any) => s.quizId));
+      const ids = new Set<string>(
+        (subData.submissions || []).map((s: any) =>
+          typeof s.quizId === 'object' ? s.quizId._id?.toString() : s.quizId?.toString()
+        )
+      );
       setAttempted(ids);
       setLoading(false);
     });
@@ -77,10 +81,14 @@ export default function StudentDashboard() {
   const available = quizzes.filter(q => {
     const from = new Date(q.availableFrom);
     const to   = new Date(q.availableTo);
-    return now >= from && now <= to && !attempted.has(q._id);
+    return now >= from && now <= to && !attempted.has(q._id.toString());
   });
-  const upcoming = quizzes.filter(q => new Date(q.availableFrom) > now && !attempted.has(q._id));
-  const past     = quizzes.filter(q => attempted.has(q._id) || new Date(q.availableTo) < now);
+  const upcoming = quizzes.filter(q =>
+    new Date(q.availableFrom) > now && !attempted.has(q._id.toString())
+  );
+  const past = quizzes.filter(q =>
+    attempted.has(q._id.toString()) || new Date(q.availableTo) < now
+  );
 
   if (loading) return (
     <div style={{ textAlign: 'center', padding: 80, color: 'var(--text-muted)' }}>
@@ -142,11 +150,24 @@ export default function StudentDashboard() {
                     <Countdown to={q.availableTo} />
                   </div>
                 </div>
-                <Link href={`/dashboard/quiz/${q._id}`}>
-                  <button className="btn-primary" style={{ padding: '9px 22px' }}>
-                    Start →
+                {attempted.has(q._id.toString()) ? (
+                  <button
+                    disabled
+                    style={{
+                      padding: '9px 22px', borderRadius: 10, fontSize: 14, fontWeight: 600,
+                      background: 'var(--bg-elevated)', color: 'var(--text-muted)',
+                      border: '1px solid var(--border)', cursor: 'not-allowed',
+                    }}
+                  >
+                    Submitted ✓
                   </button>
-                </Link>
+                ) : (
+                  <Link href={`/dashboard/quiz/${q._id}`}>
+                    <button className="btn-primary" style={{ padding: '9px 22px' }}>
+                      Start →
+                    </button>
+                  </Link>
+                )}
               </div>
             ))}
           </div>
