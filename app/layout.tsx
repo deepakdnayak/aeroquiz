@@ -3,7 +3,7 @@ import './globals.css';
 import { Providers } from './providers';
 
 export const metadata: Metadata = {
-  title: 'QuizDash',
+  title: 'AreoQuiz',
   description: 'Daily Quiz Platform',
 };
 

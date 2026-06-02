@@ -66,14 +66,11 @@ export default function LoginPage() {
       <div className="card fade-up" style={{ width: '100%', maxWidth: 420, padding: 40 }}>
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 36 }}>
-          <div style={{
-            width: 52, height: 52,
-            background: 'linear-gradient(135deg, var(--accent), #a855f7)',
-            borderRadius: 14,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 24, margin: '0 auto 16px',
-            boxShadow: '0 0 30px var(--accent-glow)',
-          }}>⚡</div>
+          <img
+            src="/logo.png"
+            alt="AreoQuiz Logo"
+            style={{ width: 52, height: 52, margin: '0 auto 16px', display: 'block' }}
+          />
           <h1 style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.02em' }}>
             Quiz<span style={{ color: 'var(--accent)' }}>Dash</span>
           </h1>
@@ -125,7 +122,7 @@ export default function LoginPage() {
         </form>
 
         <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 12, marginTop: 24 }}>
-          QuizDash · Internal Use Only
+          AreoQuiz · Internal Use Only
         </p>
       </div>
     </div>

@@ -30,12 +30,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Logo */}
         <div style={{ padding: '0 20px 28px', borderBottom: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{
-              width: 34, height: 34,
-              background: 'linear-gradient(135deg, var(--accent), #a855f7)',
-              borderRadius: 9, display: 'flex', alignItems: 'center',
-              justifyContent: 'center', fontSize: 16,
-            }}>⚡</div>
+            <img
+              src="/logo.png"
+              alt="AreoQuiz Logo"
+              style={{ width: 34, height: 34, borderRadius: 9 }}
+            />
             <div>
               <div style={{ fontWeight: 800, fontSize: 15, letterSpacing: '-0.02em' }}>
                 Quiz<span style={{ color: 'var(--accent)' }}>Dash</span>

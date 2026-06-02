@@ -29,12 +29,11 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
       }}>
         <div style={{ padding: '0 20px 28px', borderBottom: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{
-              width: 34, height: 34,
-              background: 'linear-gradient(135deg, #22c55e, #16a34a)',
-              borderRadius: 9, display: 'flex', alignItems: 'center',
-              justifyContent: 'center', fontSize: 16,
-            }}>⚡</div>
+            <img
+              src="/logo.png"
+              alt="AreoQuiz Logo"
+              style={{ width: 34, height: 34, borderRadius: 9 }}
+            />
             <div>
               <div style={{ fontWeight: 800, fontSize: 15, letterSpacing: '-0.02em' }}>
                 Quiz<span style={{ color: '#22c55e' }}>Dash</span>
