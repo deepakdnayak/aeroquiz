@@ -5,18 +5,23 @@
 /* @tailwind components; */
 @tailwind utilities;
 
+/* Default theme applied via html[data-theme] — always wins over :root */
 :root {
-  --bg: #0a0a0f;
-  --bg-card: #111118;
-  --bg-elevated: #18181f;
-  --border: #2a2a3a;
-  --border-light: #3a3a4a;
   --accent: #6c63ff;
   --accent-hover: #7c73ff;
   --accent-glow: rgba(108, 99, 255, 0.3);
   --success: #22c55e;
   --warning: #f59e0b;
   --danger: #ef4444;
+}
+
+html[data-theme="dark"],
+html:not([data-theme]) {
+  --bg: #0a0a0f;
+  --bg-card: #111118;
+  --bg-elevated: #18181f;
+  --border: #2a2a3a;
+  --border-light: #3a3a4a;
   --text-primary: #f0f0ff;
   --text-secondary: #9090a8;
   --text-muted: #5a5a72;
@@ -24,6 +29,48 @@
   --social: #f59e0b;
   --english: #22c55e;
   --maths: #ec4899;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --accent-glow: rgba(108, 99, 255, 0.3);
+}
+
+html[data-theme="light"] {
+  --bg: #f4f4fb;
+  --bg-card: #ffffff;
+  --bg-elevated: #ebebf5;
+  --border: #d8d8e8;
+  --border-light: #c8c8da;
+  --text-primary: #0a0a1a;
+  --text-secondary: #4a4a62;
+  --text-muted: #8a8aa2;
+  --science: #2563eb;
+  --social: #d97706;
+  --english: #16a34a;
+  --maths: #db2777;
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --accent-glow: rgba(108, 99, 255, 0.15);
+}
+
+html[data-theme="darker"] {
+  --bg: #050508;
+  --bg-card: #08080e;
+  --bg-elevated: #0e0e16;
+  --border: #1a1a28;
+  --border-light: #252535;
+  --text-primary: #e8e8ff;
+  --text-secondary: #7070a0;
+  --text-muted: #404060;
+  --science: #3b82f6;
+  --social: #f59e0b;
+  --english: #22c55e;
+  --maths: #ec4899;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --accent-glow: rgba(108, 99, 255, 0.4);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -33,6 +80,7 @@ body {
   color: var(--text-primary);
   font-family: 'Sora', sans-serif;
   min-height: 100vh;
+  transition: background 0.25s ease, color 0.2s ease;
 }
 
 ::-webkit-scrollbar { width: 6px; }
@@ -45,6 +93,7 @@ body {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 16px;
+  transition: background 0.25s ease, border-color 0.25s ease;
 }
 
 .card-elevated {
@@ -148,12 +197,7 @@ body {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
-  50%       { box-shadow: 0 0 20px 4px var(--accent-glow); }
-}
-
-.fade-up { animation: fadeUp 0.4s ease forwards; }
+.fade-up   { animation: fadeUp 0.4s ease forwards; }
 .fade-up-1 { animation: fadeUp 0.4s ease 0.1s both; }
 .fade-up-2 { animation: fadeUp 0.4s ease 0.2s both; }
 .fade-up-3 { animation: fadeUp 0.4s ease 0.3s both; }

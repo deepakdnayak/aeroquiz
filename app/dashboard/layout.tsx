@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function StudentLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -68,12 +69,15 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
           })}
         </nav>
 
-        <div style={{ padding: '0 12px' }}>
-          <button
-            onClick={() => signOut({ callbackUrl: '/login' })}
-            className="btn-ghost"
-            style={{ width: '100%', fontSize: 13 }}
-          >Sign Out</button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <ThemeToggle />
+          <div style={{ padding: '0 12px' }}>
+            <button
+              onClick={() => signOut({ callbackUrl: '/login' })}
+              className="btn-ghost"
+              style={{ width: '100%', fontSize: 13 }}
+            >Sign Out</button>
+          </div>
         </div>
       </aside>
 

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const navItems = [
   { href: '/admin',             label: 'Dashboard', icon: '⬛' },
@@ -68,15 +69,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           })}
         </nav>
 
-        {/* Sign out */}
-        <div style={{ padding: '0 12px' }}>
-          <button
-            onClick={() => signOut({ callbackUrl: '/login' })}
-            className="btn-ghost"
-            style={{ width: '100%', fontSize: 13 }}
-          >
-            Sign Out
-          </button>
+        {/* Theme + Sign out */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <ThemeToggle />
+          <div style={{ padding: '0 12px' }}>
+            <button
+              onClick={() => signOut({ callbackUrl: '/login' })}
+              className="btn-ghost"
+              style={{ width: '100%', fontSize: 13 }}
+            >
+              Sign Out
+            </button>
+          </div>
         </div>
       </aside>
 

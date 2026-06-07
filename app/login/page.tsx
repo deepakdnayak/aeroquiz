@@ -6,10 +6,11 @@ import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError]       = useState('');
-  const [loading, setLoading]   = useState(false);
+  const [username, setUsername]   = useState('');
+  const [password, setPassword]   = useState('');
+  const [showPass, setShowPass]   = useState(false);
+  const [error, setError]         = useState('');
+  const [loading, setLoading]     = useState(false);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -28,9 +29,8 @@ export default function LoginPage() {
       return;
     }
 
-    // Fetch session to determine role
     const sessionRes = await fetch('/api/auth/session');
-    const session = await sessionRes.json();
+    const session    = await sessionRes.json();
 
     if (session?.user?.role === 'admin') {
       router.push('/admin');
@@ -71,7 +71,7 @@ export default function LoginPage() {
             alt="AreoQuiz Logo"
             style={{ width: 52, height: 52, margin: '0 auto 16px', display: 'block' }}
           />
-          <h1 style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.02em' }}>
+          <h1 style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
             Quiz<span style={{ color: 'var(--accent)' }}>Dash</span>
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 6 }}>
@@ -80,6 +80,8 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+
+          {/* Username */}
           <div>
             <label className="label">Username</label>
             <input
@@ -89,40 +91,97 @@ export default function LoginPage() {
               value={username}
               onChange={e => setUsername(e.target.value)}
               required
-            />
-          </div>
-          <div>
-            <label className="label">Password</label>
-            <input
-              className="input"
-              type="password"
-              placeholder="Enter password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
+              autoComplete="username"
             />
           </div>
 
+          {/* Password with show/hide toggle */}
+          <div>
+            <label className="label">Password</label>
+            <div style={{ position: 'relative' }}>
+              <input
+                className="input"
+                type={showPass ? 'text' : 'password'}
+                placeholder="Enter password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+                style={{ paddingRight: 44 }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPass(p => !p)}
+                style={{
+                  position: 'absolute',
+                  right: 12,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 4,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--text-muted)',
+                  transition: 'color 0.15s',
+                  borderRadius: 4,
+                }}
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-secondary)')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
+                title={showPass ? 'Hide password' : 'Show password'}
+                aria-label={showPass ? 'Hide password' : 'Show password'}
+              >
+                {showPass ? (
+                  /* Eye-off icon */
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" strokeWidth="2"
+                    strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                ) : (
+                  /* Eye icon */
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" strokeWidth="2"
+                    strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Error */}
           {error && (
             <div style={{
               background: 'rgba(239,68,68,0.1)',
               border: '1px solid rgba(239,68,68,0.3)',
-              borderRadius: 8,
-              padding: '10px 14px',
-              fontSize: 13,
-              color: 'var(--danger)',
+              borderRadius: 8, padding: '10px 14px',
+              fontSize: 13, color: 'var(--danger)',
             }}>
               {error}
             </div>
           )}
 
-          <button className="btn-primary" type="submit" disabled={loading} style={{ marginTop: 4, padding: '13px 20px', fontSize: 15 }}>
+          <button
+            className="btn-primary"
+            type="submit"
+            disabled={loading}
+            style={{ marginTop: 4, padding: '13px 20px', fontSize: 15 }}
+          >
             {loading ? 'Signing in...' : 'Sign In →'}
           </button>
         </form>
 
-        <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 12, marginTop: 24 }}>
-          AreoQuiz · Internal Use Only
+        <p style={{
+          textAlign: 'center', color: 'var(--text-muted)',
+          fontSize: 12, marginTop: 24,
+        }}>
+          QuizDash · Internal Use Only
         </p>
       </div>
     </div>
