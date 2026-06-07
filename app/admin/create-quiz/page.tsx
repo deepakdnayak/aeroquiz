@@ -103,6 +103,17 @@ export default function CreateQuizPage() {
     }));
   }
 
+  function toLocalISO(localStr: string): string {
+    if (!localStr) return localStr;
+    // datetime-local string has no timezone — treat as local time
+    // and convert to proper ISO with offset
+    const date = new Date(localStr);
+    // Get timezone offset in minutes and convert to ±HH:MM
+    const offsetMs  = date.getTimezoneOffset() * 60000;
+    const localTime = new Date(date.getTime() - offsetMs);
+    return localTime.toISOString();
+  }
+
   async function handlePublish(status: 'draft' | 'published') {
     if (!form.title || !form.availableFrom || !form.availableTo) {
       setError('Please fill title and time window before publishing.');
@@ -114,7 +125,13 @@ export default function CreateQuizPage() {
     const res = await fetch('/api/quiz', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...form, questions, status }),
+      body: JSON.stringify({
+        ...form,
+        availableFrom: toLocalISO(form.availableFrom),
+        availableTo:   toLocalISO(form.availableTo),
+        questions,
+        status,
+      }),
     });
 
     const data = await res.json();
