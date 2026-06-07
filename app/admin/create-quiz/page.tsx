@@ -105,13 +105,22 @@ export default function CreateQuizPage() {
 
   function toLocalISO(localStr: string): string {
     if (!localStr) return localStr;
-    // datetime-local string has no timezone — treat as local time
-    // and convert to proper ISO with offset
-    const date = new Date(localStr);
-    // Get timezone offset in minutes and convert to ±HH:MM
-    const offsetMs  = date.getTimezoneOffset() * 60000;
-    const localTime = new Date(date.getTime() - offsetMs);
-    return localTime.toISOString();
+
+    // datetime-local gives "YYYY-MM-DDTHH:mm" with NO timezone info
+    // We need to interpret it as the user's local time and convert to UTC ISO
+
+    // Split the string manually — do NOT pass to new Date() directly
+    // because Node.js treats no-timezone strings as UTC, browser treats as local
+    // We want consistent local-time behaviour on both
+    const [datePart, timePart] = localStr.split('T');
+    const [year, month, day]   = datePart.split('-').map(Number);
+    const [hour, minute]       = timePart.split(':').map(Number);
+
+    // Construct date using local values — browser interprets these as local time
+    const localDate = new Date(year, month - 1, day, hour, minute, 0, 0);
+
+    // Now convert to UTC ISO string
+    return localDate.toISOString();
   }
 
   async function handlePublish(status: 'draft' | 'published') {
